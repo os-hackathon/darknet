@@ -1,4 +1,5 @@
-GPU=0
+USE_HIP=1
+GPU=1
 CUDNN=0
 CUDNN_HALF=0
 OPENCV=0
@@ -17,10 +18,17 @@ ZED_CAMERA_v2_8=0
 USE_CPP=0
 DEBUG=0
 
+ifeq ($(USE_HIP), 1)
+ARCH=
+#--gpu-architecture=${HIP_GPU}
+else
 ARCH= -gencode arch=compute_35,code=sm_35 \
       -gencode arch=compute_50,code=[sm_50,compute_50] \
       -gencode arch=compute_52,code=[sm_52,compute_52] \
-	    -gencode arch=compute_61,code=[sm_61,compute_61]
+      -gencode arch=compute_61,code=[sm_61,compute_61] \
+      -gencode arch=compute_70,code=[sm_70,compute_70] \
+      -gencode arch=compute_72,code=[sm_72,compute_72]
+endif
 
 OS := $(shell uname)
 
@@ -67,11 +75,13 @@ LIBNAMESO=libdarknet.so
 APPNAMESO=uselib
 endif
 
+
 ifeq ($(USE_CPP), 1)
 CC=g++
 else
 CC=gcc
 endif
+
 
 CPP=g++ -std=c++11
 NVCC=nvcc
@@ -79,6 +89,11 @@ OPTS=-Ofast
 LDFLAGS= -lm -pthread
 COMMON= -Iinclude/ -I3rdparty/stb/include
 CFLAGS=-Wall -Wfatal-errors -Wno-unused-result -Wno-unknown-pragmas -fPIC
+
+ifeq ($(USE_HIP), 1)
+CPP=g++ -std=c++11
+NVCC=hipcc
+endif
 
 ifeq ($(DEBUG), 1)
 #OPTS= -O0 -g
@@ -171,6 +186,7 @@ $(LIBNAMESO): $(OBJDIR) $(OBJS) include/yolo_v2_class.hpp src/yolo_v2_class.cpp
 $(APPNAMESO): $(LIBNAMESO) include/yolo_v2_class.hpp src/yolo_console_dll.cpp
 	$(CPP) -std=c++11 $(COMMON) $(CFLAGS) -o $@ src/yolo_console_dll.cpp $(LDFLAGS) -L ./ -l:$(LIBNAMESO)
 endif
+
 
 $(EXEC): $(OBJS)
 	$(CPP) -std=c++11 $(COMMON) $(CFLAGS) $^ -o $@ $(LDFLAGS)
