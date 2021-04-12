@@ -1,3 +1,4 @@
+#include "amdgpu.hpp"
 #include "darknet.h"
 #include <cuda_runtime.h>
 #include <curand.h>

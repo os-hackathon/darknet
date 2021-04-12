@@ -1,3 +1,4 @@
+#include "amdgpu.hpp"
 #ifdef _MSC_VER
 #include "gettimeofday.h"
 

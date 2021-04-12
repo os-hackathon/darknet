@@ -1,3 +1,4 @@
+#include "amdgpu.hpp"
 #include <stdio.h>
 
 #include "network.h"

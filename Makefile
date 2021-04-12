@@ -18,10 +18,7 @@ ZED_CAMERA_v2_8=0
 USE_CPP=0
 DEBUG=0
 
-ifeq ($(USE_HIP), 1)
-ARCH=
-#--gpu-architecture=${HIP_GPU}
-else
+ifeq ($(GPU_PLATFORM), nvcc)
 ARCH= -gencode arch=compute_35,code=sm_35 \
       -gencode arch=compute_50,code=[sm_50,compute_50] \
       -gencode arch=compute_52,code=[sm_52,compute_52] \
@@ -82,17 +79,18 @@ else
 CC=gcc
 endif
 
-
 CPP=g++ -std=c++11
 NVCC=nvcc
-OPTS=-Ofast
+OPTS=-O3
 LDFLAGS= -lm -pthread
 COMMON= -Iinclude/ -I3rdparty/stb/include
-CFLAGS=-Wall -Wfatal-errors -Wno-unused-result -Wno-unknown-pragmas -fPIC
+#CFLAGS=-Wall -Wfatal-errors -Wno-unused-result -Wno-unknown-pragmas -fPIC
+CFLAGS=
 
 ifeq ($(USE_HIP), 1)
+CC=hipcc -v
 CPP=g++ -std=c++11
-NVCC=hipcc
+NVCC=hipcc -v
 endif
 
 ifeq ($(DEBUG), 1)
@@ -187,6 +185,11 @@ $(APPNAMESO): $(LIBNAMESO) include/yolo_v2_class.hpp src/yolo_console_dll.cpp
 	$(CPP) -std=c++11 $(COMMON) $(CFLAGS) -o $@ src/yolo_console_dll.cpp $(LDFLAGS) -L ./ -l:$(LIBNAMESO)
 endif
 
+ifeq ($(USE_HIP),1)
+NVCCFLAGS=$(CFLAGS)
+else
+NVCCFLAGS='--compiler-options "$(CFLAGS)"'
+endif
 
 $(EXEC): $(OBJS)
 	$(CPP) -std=c++11 $(COMMON) $(CFLAGS) $^ -o $@ $(LDFLAGS)
@@ -198,7 +201,7 @@ $(OBJDIR)%.o: %.cpp $(DEPS)
 	$(CPP) -std=c++11 $(COMMON) $(CFLAGS) -c $< -o $@
 
 $(OBJDIR)%.o: %.cu $(DEPS)
-	$(NVCC) $(ARCH) $(COMMON) --compiler-options "$(CFLAGS)" -c $< -o $@
+	$(NVCC) $(ARCH) $(COMMON) $(NVCCFLAGS) -c $< -o $@
 
 $(OBJDIR):
 	mkdir -p $(OBJDIR)

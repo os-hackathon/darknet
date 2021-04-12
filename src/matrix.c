@@ -1,3 +1,4 @@
+#include "amdgpu.hpp"
 #include "matrix.h"
 #include "utils.h"
 #include <stdio.h>

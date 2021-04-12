@@ -1,3 +1,4 @@
+#include "amdgpu.hpp"
 #include "deconvolutional_layer.h"
 #include "convolutional_layer.h"
 #include "utils.h"

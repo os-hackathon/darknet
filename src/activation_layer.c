@@ -1,3 +1,4 @@
+#include "amdgpu.hpp"
 #include "activation_layer.h"
 #include "utils.h"
 #include "dark_cuda.h"

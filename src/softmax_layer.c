@@ -1,3 +1,4 @@
+#include "amdgpu.hpp"
 #include "softmax_layer.h"
 #include "blas.h"
 #include "dark_cuda.h"

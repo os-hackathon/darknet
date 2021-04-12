@@ -1,3 +1,4 @@
+#include "amdgpu.hpp"
 #include "avgpool_layer.h"
 #include "dark_cuda.h"
 #include "utils.h"

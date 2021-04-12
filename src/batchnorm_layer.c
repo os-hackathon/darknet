@@ -1,3 +1,4 @@
+#include "amdgpu.hpp"
 #include "batchnorm_layer.h"
 #include "blas.h"
 #include "utils.h"

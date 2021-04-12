@@ -1,3 +1,4 @@
+#include "amdgpu.hpp"
 #include "region_layer.h"
 #include "activations.h"
 #include "blas.h"

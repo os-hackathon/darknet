@@ -1,3 +1,4 @@
+#include "amdgpu.hpp"
 #include "layer.h"
 #include "dark_cuda.h"
 #include <stdlib.h>

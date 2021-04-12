@@ -1,3 +1,4 @@
+#include "amdgpu.hpp"
 #include <stdlib.h>
 #include "darknet.h"
 #include "network.h"

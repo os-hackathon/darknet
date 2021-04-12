@@ -1,3 +1,4 @@
+#include "amdgpu.hpp"
 #include "yolo_layer.h"
 #include "activations.h"
 #include "blas.h"

@@ -1,3 +1,4 @@
+#include "amdgpu.hpp"
 #include "route_layer.h"
 #include "utils.h"
 #include "dark_cuda.h"

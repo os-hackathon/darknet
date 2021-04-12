@@ -1,3 +1,4 @@
+#include "amdgpu.hpp"
 // Gaussian YOLOv3 implementation
 // Author: Jiwoong Choi
 // ICCV 2019 Paper: http://openaccess.thecvf.com/content_ICCV_2019/html/Choi_Gaussian_YOLOv3_An_Accurate_and_Fast_Object_Detector_Using_Localization_ICCV_2019_paper.html

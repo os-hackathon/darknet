@@ -1,3 +1,4 @@
+#include "amdgpu.hpp"
 #include "maxpool_layer.h"
 #include "convolutional_layer.h"
 #include "dark_cuda.h"

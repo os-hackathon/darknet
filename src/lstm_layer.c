@@ -1,3 +1,4 @@
+#include "amdgpu.hpp"
 #include "lstm_layer.h"
 #include "connected_layer.h"
 #include "utils.h"

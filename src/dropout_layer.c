@@ -1,3 +1,4 @@
+#include "amdgpu.hpp"
 #include "dropout_layer.h"
 #include "utils.h"
 #include "dark_cuda.h"
