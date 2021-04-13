@@ -1,7 +1,7 @@
-#include "amdgpu.hpp"
-#include <cuda_runtime.h>
-#include <curand.h>
-#include <cublas_v2.h>
+#include "gpu.hpp"
+
+
+
 
 #include "convolutional_layer.h"
 #include "deconvolutional_layer.h"

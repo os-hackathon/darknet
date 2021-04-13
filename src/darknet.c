@@ -1,4 +1,3 @@
-#include "amdgpu.hpp"
 #include "darknet.h"
 #include <time.h>
 #include <stdlib.h>

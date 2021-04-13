@@ -1,4 +1,3 @@
-#include "amdgpu.hpp"
 #include "shortcut_layer.h"
 #include "convolutional_layer.h"
 #include "dark_cuda.h"

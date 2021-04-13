@@ -89,7 +89,7 @@ CFLAGS=
 
 ifeq ($(USE_HIP), 1)
 CC=hipcc -v
-CPP=g++ -std=c++11
+CPP=hipcc -v
 NVCC=hipcc -v
 endif
 
@@ -126,14 +126,20 @@ ifeq ($(OPENMP), 1)
 LDFLAGS+= -lgomp
 endif
 
-ifeq ($(GPU), 1)
-COMMON+= -DGPU -I/usr/local/cuda/include/
-CFLAGS+= -DGPU
-ifeq ($(OS),Darwin) #MAC
-LDFLAGS+= -L/usr/local/cuda/lib -lcuda -lcudart -lcublas -lcurand
+ifeq ($(USE_HIP), 1)
+  COMMON+= -DGPU -D__HIP_PLATFORM_HCC__ -I/opt/rocm/include/rocrand/ -I/opt/rocm/include/
+  CFLAGS+= -DGPU
 else
-LDFLAGS+= -L/usr/local/cuda/lib64 -lcuda -lcudart -lcublas -lcurand
-endif
+  ifeq ($(GPU), 1)
+    COMMON+= -DGPU -I/usr/local/cuda/include/
+    CFLAGS+= -DGPU
+    ifeq ($(OS),Darwin) #MAC
+      LDFLAGS+= -L/usr/local/cuda/lib -lcuda -lcudart -lcublas -lcurand
+    else
+      LDFLAGS+= -L/usr/local/cuda/lib64 -lcuda -lcudart -lcublas -lcurand
+    endif
+  endif
+
 endif
 
 ifeq ($(CUDNN), 1)

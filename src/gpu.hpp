@@ -1,7 +1,12 @@
 
-#ifdef HIP_PLATFORM_HCC
-#include <hip/hip_runtime.h>
+#ifdef __HIP_PLATFORM_HCC__
+//#ifdef __HIP_ROCclr__
 
+#include <hip/hip_runtime.h>
+#include <rocrand.h>
+#include <hipblas.h>
+
+#define SHFL_DOWN(val, offset) shfl_xor(val, offset)
 #define cudaDeviceSynchronize hipDeviceSynchronize
 #define cudaError hipError_t
 #define cudaError_t hipError_t
@@ -30,4 +35,23 @@
 #define cudaReadModeElementType hipReadModeElementType
 #define cudaSetDevice hipSetDevice
 #define cudaSuccess hipSuccess
+
+#define cudaStream_t hipStream_t
+#define cublasSetStream hipblasSetStream
+
+
+//CUBLAS -> HIPBLAS
+#define cublasHandle_t hipblasHandle_t 
+#define CUBLAS_OP_N HIPBLAS_OP_N
+#define CUBLAS_OP_T HIPBLAS_OP_T
+#define cublasSgemm hipblasSgemm
+
+#else
+
+#include <cuda.h>
+#include <cuda_runtime.h>
+#include <cuda_runtime_api.h>
+#include <curand.h>
+#include <cublas_v2.h>
+
 #endif

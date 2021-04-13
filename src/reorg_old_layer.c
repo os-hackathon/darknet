@@ -1,4 +1,3 @@
-#include "amdgpu.hpp"
 #include "reorg_old_layer.h"
 #include "utils.h"
 #include "dark_cuda.h"

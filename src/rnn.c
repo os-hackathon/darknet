@@ -1,4 +1,3 @@
-#include "amdgpu.hpp"
 #include "network.h"
 #include "cost_layer.h"
 #include "utils.h"

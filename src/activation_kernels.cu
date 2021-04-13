@@ -1,8 +1,8 @@
-#include "amdgpu.hpp"
+#include "gpu.hpp"
 #include "darknet.h"
-#include <cuda_runtime.h>
-#include <curand.h>
-#include <cublas_v2.h>
+
+
+
 #include <float.h>
 
 #include "activations.h"
@@ -186,7 +186,7 @@ __global__ void binary_gradient_array_kernel(float *x, float *dy, int n, int s, 
 
 extern "C" void binary_gradient_array_gpu(float *x, float *dx, int n, int size, BINARY_ACTIVATION a, float *y)
 {
-    binary_gradient_array_kernel << <cuda_gridsize(n / 2), BLOCK, 0, get_cuda_stream() >> >(x, dx, n / 2, size, a, y);
+
     CHECK_CUDA(cudaPeekAtLastError());
 }
 __global__ void binary_activate_array_kernel(float *x, int n, int s, BINARY_ACTIVATION a, float *y)
@@ -201,7 +201,7 @@ __global__ void binary_activate_array_kernel(float *x, int n, int s, BINARY_ACTI
 
 extern "C" void binary_activate_array_gpu(float *x, int n, int size, BINARY_ACTIVATION a, float *y)
 {
-    binary_activate_array_kernel << <cuda_gridsize(n / 2), BLOCK, 0, get_cuda_stream() >> >(x, n / 2, size, a, y);
+
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
@@ -505,28 +505,28 @@ extern "C" void activate_array_ongpu(float *x, int n, ACTIVATION a)
     else if (a == SELU) activate_array_selu_kernel << <num_blocks, BLOCK, 0, get_cuda_stream() >> >(x, n);
     else if (a == GELU) activate_array_gelu_kernel << <num_blocks, BLOCK, 0, get_cuda_stream() >> >(x, n);
     else
-        activate_array_kernel<<<cuda_gridsize(n), BLOCK, 0, get_cuda_stream()>>>(x, n, a);
+
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
 extern "C" void activate_array_swish_ongpu(float *x, int n, float *output_sigmoid_gpu, float *output_gpu)
 {
     const int num_blocks = get_number_of_blocks(n, BLOCK);
-    activate_array_swish_kernel << <cuda_gridsize(n), BLOCK, 0, get_cuda_stream() >> >(x, n, output_sigmoid_gpu, output_gpu);
+
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
 extern "C" void activate_array_mish_ongpu(float *x, int n, float *activation_input_gpu, float *output_gpu)
 {
     const int num_blocks = get_number_of_blocks(n, BLOCK);
-    activate_array_mish_kernel << <cuda_gridsize(n), BLOCK, 0, get_cuda_stream() >> >(x, n, activation_input_gpu, output_gpu);
+
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
 extern "C" void activate_array_hard_mish_ongpu(float *x, int n, float *activation_input_gpu, float *output_gpu)
 {
     const int num_blocks = get_number_of_blocks(n, BLOCK);
-    activate_array_hard_mish_kernel << <cuda_gridsize(n), BLOCK, 0, get_cuda_stream() >> >(x, n, activation_input_gpu, output_gpu);
+
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
@@ -549,7 +549,7 @@ extern "C" void gradient_array_ongpu(float *x, int n, ACTIVATION a, float *delta
     else if (a == SELU) gradient_array_selu_kernel << <num_blocks, BLOCK, 0, get_cuda_stream() >> >(x, n, delta);
     else if (a == GELU) gradient_array_gelu_kernel << <num_blocks, BLOCK, 0, get_cuda_stream() >> >(x, n, delta);
     else
-        gradient_array_kernel << <cuda_gridsize(n), BLOCK, 0, get_cuda_stream() >> > (x, n, a, delta);
+
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
@@ -557,21 +557,21 @@ extern "C" void gradient_array_ongpu(float *x, int n, ACTIVATION a, float *delta
 extern "C" void gradient_array_swish_ongpu(float *x, int n, float *sigmoid_gpu, float *delta)
 {
     const int num_blocks = get_number_of_blocks(n, BLOCK);
-    gradient_array_swish_kernel << <cuda_gridsize(n), BLOCK, 0, get_cuda_stream() >> > (x, n, sigmoid_gpu, delta);
+
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
 extern "C" void gradient_array_mish_ongpu(int n, float *activation_input_gpu, float *delta)
 {
     const int num_blocks = get_number_of_blocks(n, BLOCK);
-    gradient_array_mish_kernel << <cuda_gridsize(n), BLOCK, 0, get_cuda_stream() >> > (n, activation_input_gpu, delta);
+
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
 extern "C" void gradient_array_hard_mish_ongpu(int n, float *activation_input_gpu, float *delta)
 {
     const int num_blocks = get_number_of_blocks(n, BLOCK);
-    gradient_array_hard_mish_kernel << <cuda_gridsize(n), BLOCK, 0, get_cuda_stream() >> > (n, activation_input_gpu, delta);
+
     CHECK_CUDA(cudaPeekAtLastError());
 }
 

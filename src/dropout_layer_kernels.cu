@@ -1,7 +1,7 @@
-#include "amdgpu.hpp"
-#include <cuda_runtime.h>
-#include <curand.h>
-#include <cublas_v2.h>
+#include "gpu.hpp"
+
+
+
 #include <cstring>
 
 #include "dropout_layer.h"
@@ -222,7 +222,7 @@ void forward_dropout_layer_gpu(dropout_layer l, network_state state)
         cuda_push_array(layer.rand_gpu, layer.rand, size);
         */
 
-        yoloswag420blazeit360noscope << <cuda_gridsize(size), BLOCK, 0, get_cuda_stream() >> > (state.input, size, l.rand_gpu, l.probability, l.scale);
+
         CHECK_CUDA(cudaPeekAtLastError());
     }
 }
@@ -306,7 +306,7 @@ void backward_dropout_layer_gpu(dropout_layer l, network_state state)
     }
     // dropout
     else {
-        yoloswag420blazeit360noscope << <cuda_gridsize(size), BLOCK, 0, get_cuda_stream() >> > (state.delta, size, l.rand_gpu, l.probability, l.scale);
+
         CHECK_CUDA(cudaPeekAtLastError());
     }
 }

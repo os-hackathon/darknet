@@ -1,4 +1,3 @@
-#include "amdgpu.hpp"
 #include "crnn_layer.h"
 #include "convolutional_layer.h"
 #include "utils.h"

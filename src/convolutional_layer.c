@@ -1,4 +1,3 @@
-#include "amdgpu.hpp"
 #include "convolutional_layer.h"
 #include "utils.h"
 #include "batchnorm_layer.h"

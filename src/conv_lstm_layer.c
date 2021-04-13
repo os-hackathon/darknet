@@ -1,4 +1,3 @@
-#include "amdgpu.hpp"
 // Page 4: https://arxiv.org/abs/1506.04214v2
 // Page 3: https://arxiv.org/pdf/1705.06368v3.pdf
 // https://wikimedia.org/api/rest_v1/media/math/render/svg/1edbece2559479959fe829e9c6657efb380debe7

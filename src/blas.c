@@ -1,4 +1,3 @@
-#include "amdgpu.hpp"
 #include "blas.h"
 #include "utils.h"
 

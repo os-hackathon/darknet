@@ -1,4 +1,3 @@
-#include "amdgpu.hpp"
 #include "activations.h"
 
 #include <math.h>

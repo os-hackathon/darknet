@@ -1,4 +1,3 @@
-#include "amdgpu.hpp"
 #include "box.h"
 #include "utils.h"
 #include <stdio.h>

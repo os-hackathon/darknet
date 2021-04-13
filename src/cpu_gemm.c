@@ -1,4 +1,3 @@
-#include "amdgpu.hpp"
 //#include "mini_blas.h"
 #ifdef __cplusplus
 #define PUT_IN_REGISTER

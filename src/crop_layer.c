@@ -1,4 +1,3 @@
-#include "amdgpu.hpp"
 #include "utils.h"
 #include "crop_layer.h"
 #include "dark_cuda.h"

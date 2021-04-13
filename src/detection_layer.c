@@ -1,4 +1,3 @@
-#include "amdgpu.hpp"
 #include "detection_layer.h"
 #include "activations.h"
 #include "softmax_layer.h"

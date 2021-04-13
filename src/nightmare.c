@@ -1,4 +1,3 @@
-#include "amdgpu.hpp"
 
 #include "network.h"
 #include "parser.h"

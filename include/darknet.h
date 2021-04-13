@@ -38,9 +38,7 @@ typedef enum { UNUSED_DEF_VAL } UNUSED_ENUM_TYPE;
 
 #ifdef GPU
 
-#include <cuda_runtime.h>
-#include <curand.h>
-#include <cublas_v2.h>
+#include "../src/gpu.hpp"
 
 #ifdef CUDNN
 #include <cudnn.h>

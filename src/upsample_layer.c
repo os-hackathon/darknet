@@ -1,4 +1,3 @@
-#include "amdgpu.hpp"
 #include "upsample_layer.h"
 #include "dark_cuda.h"
 #include "utils.h"

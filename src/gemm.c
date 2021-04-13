@@ -1,4 +1,3 @@
-#include "amdgpu.hpp"
 #include "gemm.h"
 #include "utils.h"
 #include "im2col.h"

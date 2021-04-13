@@ -1,7 +1,7 @@
-#include "amdgpu.hpp"
-#include <cuda_runtime.h>
-#include <curand.h>
-#include <cublas_v2.h>
+#include "gpu.hpp"
+
+
+
 #include <stdint.h>
 
 #include "im2col.h"

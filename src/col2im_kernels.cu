@@ -1,7 +1,7 @@
-#include "amdgpu.hpp"
-#include <cuda_runtime.h>
-#include <curand.h>
-#include <cublas_v2.h>
+#include "gpu.hpp"
+
+
+
 
 #include "col2im.h"
 #include "dark_cuda.h"

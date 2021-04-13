@@ -1,4 +1,3 @@
-#include "amdgpu.hpp"
 #include "normalization_layer.h"
 #include "blas.h"
 #include "utils.h"

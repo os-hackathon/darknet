@@ -1,4 +1,3 @@
-#include "amdgpu.hpp"
 #include "data.h"
 #include "utils.h"
 #include "image.h"

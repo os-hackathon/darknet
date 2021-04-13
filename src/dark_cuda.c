@@ -1,4 +1,3 @@
-#include "amdgpu.hpp"
 #ifdef __cplusplus
 extern "C" {
 #endif

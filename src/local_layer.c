@@ -1,4 +1,3 @@
-#include "amdgpu.hpp"
 #include "local_layer.h"
 #include "utils.h"
 #include "im2col.h"
