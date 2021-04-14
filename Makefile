@@ -128,8 +128,9 @@ ifeq ($(USE_HIP), 1)
   NVCC=hipcc -v
 
   ifeq ($(HIP_PLATFORM),hcc)
-    COMMON+= -DGPU -I/opt/rocm/include/rocrand/ -I/opt/rocm/include/
+    COMMON+= -DGPU -D__HIP_PLATFORM_HCC__ -I/opt/rocm/include/hiprand -I/opt/rocm/include/rocrand -I/opt/rocm/include/
     CFLAGS+= -x c++ -DGPU
+    LDFLAGS+= -L/opt/rocm/lib/ -lhipblas -lhiprand -lrocrand
   else ifeq ($(HIP_PLATFORM),nvcc)
     COMMON+= -DGPU -I/usr/local/cuda/include
     CFLAGS+= -DGPU
