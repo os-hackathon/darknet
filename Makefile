@@ -82,16 +82,11 @@ endif
 CPP=g++ -std=c++11
 NVCC=nvcc
 OPTS=-O3
-LDFLAGS= -lm -pthread
+LDFLAGS= -lm -Xcompiler="-pthread"
 COMMON= -Iinclude/ -I3rdparty/stb/include
 #CFLAGS=-Wall -Wfatal-errors -Wno-unused-result -Wno-unknown-pragmas -fPIC
 CFLAGS=
 
-ifeq ($(USE_HIP), 1)
-CC=hipcc -v
-CPP=hipcc -v
-NVCC=hipcc -v
-endif
 
 ifeq ($(DEBUG), 1)
 #OPTS= -O0 -g
@@ -127,9 +122,22 @@ LDFLAGS+= -lgomp
 endif
 
 ifeq ($(USE_HIP), 1)
-  COMMON+= -DGPU -D__HIP_PLATFORM_HCC__ -I/opt/rocm/include/rocrand/ -I/opt/rocm/include/
-  CFLAGS+= -DGPU
+
+  CC=hipcc -v
+  CPP=hipcc -v
+  NVCC=hipcc -v
+
+  ifeq ($(HIP_PLATFORM),hcc)
+    COMMON+= -DGPU -I/opt/rocm/include/rocrand/ -I/opt/rocm/include/
+    CFLAGS+= -x c++ -DGPU
+  else ifeq ($(HIP_PLATFORM),nvcc)
+    COMMON+= -DGPU -I/usr/local/cuda/include
+    CFLAGS+= -DGPU
+    LDFLAGS+= -L/usr/local/cuda/lib64 -lcuda -lcudart -lcublas -lcurand
+  endif
+
 else
+
   ifeq ($(GPU), 1)
     COMMON+= -DGPU -I/usr/local/cuda/include/
     CFLAGS+= -DGPU

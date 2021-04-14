@@ -1,7 +1,5 @@
-
-
-
 #include "gpu.hpp"
+
 #include "convolutional_layer.h"
 #include "batchnorm_layer.h"
 #include "gemm.h"
@@ -22,7 +20,7 @@ __global__ void binarize_kernel(float *x, int n, float *binary)
 
 void binarize_gpu(float *x, int n, float *binary)
 {
-
+    binarize_kernel<<<cuda_gridsize(n), BLOCK, 0, get_cuda_stream() >>>(x, n, binary);
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
@@ -43,7 +41,7 @@ __global__ void binarize_input_kernel(float *input, int n, int size, float *bina
 
 void binarize_input_gpu(float *input, int n, int size, float *binary)
 {
-
+    binarize_input_kernel<<<cuda_gridsize(size), BLOCK, 0, get_cuda_stream() >>>(input, n, size, binary);
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
@@ -65,7 +63,7 @@ __global__ void binarize_weights_kernel(float *weights, int n, int size, float *
 
 void binarize_weights_gpu(float *weights, int n, int size, float *binary)
 {
-
+    binarize_weights_kernel << <cuda_gridsize(n), BLOCK, 0, get_cuda_stream() >> >(weights, n, size, binary);
     CHECK_CUDA(cudaPeekAtLastError());
 }
 

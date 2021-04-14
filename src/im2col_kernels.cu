@@ -1,7 +1,4 @@
 #include "gpu.hpp"
-
-
-
 #include <stdint.h>
 
 #include "im2col.h"

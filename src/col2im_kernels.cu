@@ -1,8 +1,5 @@
 #include "gpu.hpp"
 
-
-
-
 #include "col2im.h"
 #include "dark_cuda.h"
 

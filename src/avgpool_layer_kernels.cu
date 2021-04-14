@@ -1,8 +1,5 @@
 #include "gpu.hpp"
 
-
-
-
 #include "avgpool_layer.h"
 #include "dark_cuda.h"
 
@@ -46,7 +43,7 @@ extern "C" void forward_avgpool_layer_gpu(avgpool_layer layer, network_state sta
 {
     size_t n = layer.c*layer.batch;
 
-
+    forward_avgpool_layer_kernel<<<cuda_gridsize(n), BLOCK, 0, get_cuda_stream() >>>(n, layer.w, layer.h, layer.c, state.input, layer.output_gpu);
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
@@ -54,6 +51,6 @@ extern "C" void backward_avgpool_layer_gpu(avgpool_layer layer, network_state st
 {
     size_t n = layer.c*layer.batch;
 
-
+    backward_avgpool_layer_kernel<<<cuda_gridsize(n), BLOCK, 0, get_cuda_stream() >>>(n, layer.w, layer.h, layer.c, state.delta, layer.delta_gpu);
     CHECK_CUDA(cudaPeekAtLastError());
 }

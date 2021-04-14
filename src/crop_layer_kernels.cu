@@ -1,8 +1,5 @@
 #include "gpu.hpp"
 
-
-
-
 #include "crop_layer.h"
 #include "utils.h"
 #include "dark_cuda.h"
@@ -194,12 +191,12 @@ extern "C" void forward_crop_layer_gpu(crop_layer layer, network_state state)
 
     int size = layer.batch * layer.w * layer.h;
 
-
+    levels_image_kernel<<<cuda_gridsize(size), BLOCK, 0, get_cuda_stream() >>>(state.input, layer.rand_gpu, layer.batch, layer.w, layer.h, state.train, layer.saturation, layer.exposure, translate, scale, layer.shift);
     CHECK_CUDA(cudaPeekAtLastError());
 
     size = layer.batch*layer.c*layer.out_w*layer.out_h;
 
-
+    forward_crop_layer_kernel<<<cuda_gridsize(size), BLOCK, 0, get_cuda_stream() >>>(state.input, layer.rand_gpu, size, layer.c, layer.h, layer.w, layer.out_h, layer.out_w, state.train, layer.flip, radians, layer.output_gpu);
     CHECK_CUDA(cudaPeekAtLastError());
 
 /*

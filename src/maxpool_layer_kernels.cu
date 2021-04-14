@@ -1,8 +1,5 @@
 #include "gpu.hpp"
 
-
-
-
 #include "maxpool_layer.h"
 #include "convolutional_layer.h"
 #include "blas.h"
@@ -156,7 +153,7 @@ extern "C" void forward_maxpool_layer_gpu(maxpool_layer layer, network_state sta
 
         size_t n = h*w*c*layer.batch;
 
-
+        forward_maxpool_depth_layer_kernel << <cuda_gridsize(n), BLOCK, 0, get_cuda_stream() >> >(
             n, layer.w, layer.h, layer.c, layer.out_c, layer.batch, state.input, layer.output_gpu, layer.indexes_gpu);
         CHECK_CUDA(cudaPeekAtLastError());
 
@@ -193,11 +190,11 @@ extern "C" void forward_maxpool_layer_gpu(maxpool_layer layer, network_state sta
 
         size_t n = h*w*c*layer.batch;
 
-
+        forward_maxpool_layer_kernel << <cuda_gridsize(n), BLOCK, 0, get_cuda_stream() >> > (n, layer.h, layer.w, layer.c, layer.stride_x, layer.stride_y, layer.size, layer.pad, state.input, layer.output_gpu, layer.indexes_gpu);
         CHECK_CUDA(cudaPeekAtLastError());
 
         if (layer.maxpool_zero_nonmax) {
-
+            forward_zero_nonmax_kernel << <cuda_gridsize(n), BLOCK, 0, get_cuda_stream() >> > (n, state.input, layer.output_gpu);
             CHECK_CUDA(cudaPeekAtLastError());
         }
     }
@@ -238,18 +235,18 @@ extern "C" void backward_maxpool_layer_gpu(maxpool_layer layer, network_state st
 
         size_t n = h * w * c * layer.batch;
 
-
+        backward_maxpool_depth_layer_kernel << <cuda_gridsize(n), BLOCK, 0, get_cuda_stream() >> >(n, layer.w, layer.h, layer.c, layer.batch, layer.delta_gpu, state.delta, layer.indexes_gpu);
         CHECK_CUDA(cudaPeekAtLastError());
         return;
     }
 
     size_t n = layer.h*layer.w*layer.c*layer.batch;
 
-
+    backward_maxpool_layer_kernel<<<cuda_gridsize(n), BLOCK, 0, get_cuda_stream() >>>(n, layer.h, layer.w, layer.c, layer.stride_x, layer.stride_y, layer.size, layer.pad, layer.delta_gpu, state.delta, layer.indexes_gpu);
     CHECK_CUDA(cudaPeekAtLastError());
 
     if (layer.maxpool_zero_nonmax) {
-
+        backward_zero_nonmax_kernel << <cuda_gridsize(n), BLOCK, 0, get_cuda_stream() >> > (n, layer.indexes_gpu, state.delta);
         CHECK_CUDA(cudaPeekAtLastError());
     }
 }
@@ -374,7 +371,7 @@ extern "C" void forward_local_avgpool_layer_gpu(maxpool_layer layer, network_sta
 
         size_t n = h*w*c*layer.batch;
 
-
+        forward_local_avgpool_layer_kernel << <cuda_gridsize(n), BLOCK, 0, get_cuda_stream() >> > (n, layer.h, layer.w, layer.c, layer.stride_x, layer.stride_y, layer.size, layer.pad, state.input, layer.output_gpu);
         CHECK_CUDA(cudaPeekAtLastError());
     }
 }
@@ -383,6 +380,6 @@ extern "C" void backward_local_avgpool_layer_gpu(maxpool_layer layer, network_st
 {
     size_t n = layer.h*layer.w*layer.c*layer.batch;
 
-
+    backward_local_avgpool_layer_kernel << <cuda_gridsize(n), BLOCK, 0, get_cuda_stream() >> >(n, layer.h, layer.w, layer.c, layer.stride_x, layer.stride_y, layer.size, layer.pad, layer.delta_gpu, state.delta);
     CHECK_CUDA(cudaPeekAtLastError());
 }

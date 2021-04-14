@@ -1,8 +1,5 @@
 #include "gpu.hpp"
 
-
-
-
 #include "convolutional_layer.h"
 #include "deconvolutional_layer.h"
 #include "gemm.h"
