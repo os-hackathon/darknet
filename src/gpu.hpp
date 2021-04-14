@@ -1,6 +1,5 @@
 
-#ifdef __HIP_PLATFORM_HCC__
-//#ifdef __HIP_ROCclr__
+#ifdef __HIP_ROCclr__
 
 #include <hip/hip_runtime.h>
 #include <rocrand.h>
