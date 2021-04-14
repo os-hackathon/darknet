@@ -1,4 +1,5 @@
-GPU=0
+GPU=1
+USE_ROCM=1
 CUDNN=0
 CUDNN_HALF=0
 OPENCV=0
@@ -17,10 +18,12 @@ ZED_CAMERA_v2_8=0
 USE_CPP=0
 DEBUG=0
 
+ifeq ($(GPU_PLATFORM), nvcc)
 ARCH= -gencode arch=compute_35,code=sm_35 \
       -gencode arch=compute_50,code=[sm_50,compute_50] \
       -gencode arch=compute_52,code=[sm_52,compute_52] \
 	    -gencode arch=compute_61,code=[sm_61,compute_61]
+endif
 
 OS := $(shell uname)
 
@@ -74,8 +77,16 @@ CC=gcc
 endif
 
 CPP=g++ -std=c++11
+
+ifeq ($(USE_ROCM), 1)
+NVCC=hipcc 
+CC=hipcc
+CPP=hipcc
+else
 NVCC=nvcc
-OPTS=-Ofast
+endif
+
+OPTS=-O3
 LDFLAGS= -lm -pthread
 COMMON= -Iinclude/ -I3rdparty/stb/include
 CFLAGS=-Wall -Wfatal-errors -Wno-unused-result -Wno-unknown-pragmas -fPIC
@@ -114,12 +125,23 @@ LDFLAGS+= -lgomp
 endif
 
 ifeq ($(GPU), 1)
+ifeq ($(USE_ROCM), 1)
+COMMON+= -DGPU -I/opt/rocm/hip/include/ # -I/opt/rocm/include/
+CFLAGS+= -D__HIP_PLATFORM_HCC__
+else
 COMMON+= -DGPU -I/usr/local/cuda/include/
+endif
 CFLAGS+= -DGPU
 ifeq ($(OS),Darwin) #MAC
 LDFLAGS+= -L/usr/local/cuda/lib -lcuda -lcudart -lcublas -lcurand
 else
+ifeq ($(USE_ROCM), 1)
+#LDFLAGS+= -L/opt/rocm/lib -L/opt/rocm/hip/lib -lamdhip -lhipblas -lhiprand
+LDFLAGS+= -L/opt/rocm/hip/lib -lamdhip -lhipblas -lhiprand
+COMMON+= -I/opt/rocm/hiprand/include -I/opt/rocm/rocrand/include -I/opt/rocm/hipblas/include
+else
 LDFLAGS+= -L/usr/local/cuda/lib64 -lcuda -lcudart -lcublas -lcurand
+endif
 endif
 endif
 
@@ -172,6 +194,12 @@ $(APPNAMESO): $(LIBNAMESO) include/yolo_v2_class.hpp src/yolo_console_dll.cpp
 	$(CPP) -std=c++11 $(COMMON) $(CFLAGS) -o $@ src/yolo_console_dll.cpp $(LDFLAGS) -L ./ -l:$(LIBNAMESO)
 endif
 
+ifeq ($(USE_ROCM), 1)
+NVCCFLAGS=$(CFLAGS)
+else
+NVCCFLAGS='--compiler-options "$(CFLAGS)"'
+endif
+
 $(EXEC): $(OBJS)
 	$(CPP) -std=c++11 $(COMMON) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
@@ -182,7 +210,7 @@ $(OBJDIR)%.o: %.cpp $(DEPS)
 	$(CPP) -std=c++11 $(COMMON) $(CFLAGS) -c $< -o $@
 
 $(OBJDIR)%.o: %.cu $(DEPS)
-	$(NVCC) $(ARCH) $(COMMON) --compiler-options "$(CFLAGS)" -c $< -o $@
+	$(NVCC) $(ARCH) $(COMMON) $(NVCCFLAGS) -c $< -o $@
 
 $(OBJDIR):
 	mkdir -p $(OBJDIR)
