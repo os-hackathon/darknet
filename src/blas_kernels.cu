@@ -32,7 +32,7 @@ void compare_2_arrays_gpu(float *one, float *two, int size)
 {
     const int num_blocks = get_number_of_blocks(size, BLOCK);
 
-    compare_2_arrays_kernel << <num_blocks, BLOCK, 0, get_cuda_stream() >> >(one, two, size);
+    compare_2_arrays_kernel <<<num_blocks, BLOCK, 0, get_cuda_stream() >>>(one, two, size);
     CHECK_CUDA(cudaPeekAtLastError());
     CHECK_CUDA(cudaDeviceSynchronize());
 }
@@ -51,7 +51,7 @@ void mean_array_gpu(float *src, int size, float alpha, float *avg)
 {
     const int num_blocks = get_number_of_blocks(size, BLOCK);
 
-    mean_array_kernel << <num_blocks, BLOCK, 0, get_cuda_stream() >> >(src, size, alpha, avg);
+    mean_array_kernel <<<num_blocks, BLOCK, 0, get_cuda_stream() >>>(src, size, alpha, avg);
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
@@ -70,7 +70,7 @@ void scale_bias_gpu(float *output, float *scale, int batch, int filters, int spa
     const int current_size = batch * filters * spatial;
     const int num_blocks = get_number_of_blocks(current_size, BLOCK);
 
-    scale_bias_kernel << <num_blocks, BLOCK, 0, get_cuda_stream() >> >(output, scale, batch, filters, spatial, current_size);
+    scale_bias_kernel <<<num_blocks, BLOCK, 0, get_cuda_stream() >>>(output, scale, batch, filters, spatial, current_size);
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
@@ -115,7 +115,7 @@ void add_bias_gpu(float *output, float *biases, int batch, int filters, int spat
     const int current_size = batch * filters * spatial;
     const int num_blocks = get_number_of_blocks(current_size, BLOCK);
 
-    add_bias_kernel << <num_blocks, BLOCK, 0, get_cuda_stream() >> >(output, biases, batch, filters, spatial, current_size);
+    add_bias_kernel <<<num_blocks, BLOCK, 0, get_cuda_stream() >>>(output, biases, batch, filters, spatial, current_size);
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
@@ -200,7 +200,7 @@ __global__ void adam_kernel(int N, float *x, float *m, float *v, float B1, float
 
 extern "C" void adam_gpu(int n, float *x, float *m, float *v, float B1, float B2, float rate, float eps, int t)
 {
-    adam_kernel << <cuda_gridsize(n), BLOCK, 0, get_cuda_stream() >> >(n, x, m, v, B1, B2, rate, eps, t);
+    adam_kernel <<<cuda_gridsize(n), BLOCK, 0, get_cuda_stream() >>>(n, x, m, v, B1, B2, rate, eps, t);
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
@@ -233,7 +233,7 @@ extern "C" void normalize_gpu(float *x, float *mean, float *variance, int batch,
     const int current_size = batch * filters * spatial;
     const int num_blocks = get_number_of_blocks(current_size, BLOCK);
 
-    normalize_kernel << <num_blocks, BLOCK, 0, get_cuda_stream() >> >(current_size, x, mean, variance, batch, filters, spatial);
+    normalize_kernel <<<num_blocks, BLOCK, 0, get_cuda_stream() >>>(current_size, x, mean, variance, batch, filters, spatial);
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
@@ -448,7 +448,7 @@ __global__ void constrain_weight_updates_kernel(int N, float coef, float *weight
 
 extern "C" void constrain_weight_updates_ongpu(int N, float coef, float *weights_gpu, float *weight_updates_gpu)
 {
-    constrain_weight_updates_kernel << <cuda_gridsize(N), BLOCK, 0, get_cuda_stream() >> >(N, coef, weights_gpu, weight_updates_gpu);
+    constrain_weight_updates_kernel <<<cuda_gridsize(N), BLOCK, 0, get_cuda_stream() >>>(N, coef, weights_gpu, weight_updates_gpu);
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
@@ -571,7 +571,7 @@ __global__ void  fast_mean_kernel(float *x, int batch, int filters, int spatial,
 
 extern "C" void fast_mean_gpu(float *x, int batch, int filters, int spatial, float *mean)
 {
-    fast_mean_kernel << <filters, BLOCK, 0, get_cuda_stream() >> >(x, batch, filters, spatial, mean);
+    fast_mean_kernel <<<filters, BLOCK, 0, get_cuda_stream() >>>(x, batch, filters, spatial, mean);
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
@@ -667,7 +667,7 @@ __global__ void  fast_v_cbn_kernel(const float *x, float *mean, int batch, int f
 extern "C" void fast_v_cbn_gpu(const float *x, float *mean, int batch, int filters, int spatial, int minibatch_index, int max_minibatch_index, float *m_avg, float *v_avg, float *variance,
     const float alpha, float *rolling_mean_gpu, float *rolling_variance_gpu, int inverse_variance, float epsilon)
 {
-    fast_v_cbn_kernel << <filters, BLOCK, 0, get_cuda_stream() >> >(x, mean, batch, filters, spatial, minibatch_index, max_minibatch_index, m_avg, v_avg, variance, alpha, rolling_mean_gpu, rolling_variance_gpu, inverse_variance, epsilon);
+    fast_v_cbn_kernel <<<filters, BLOCK, 0, get_cuda_stream() >>>(x, mean, batch, filters, spatial, minibatch_index, max_minibatch_index, m_avg, v_avg, variance, alpha, rolling_mean_gpu, rolling_variance_gpu, inverse_variance, epsilon);
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
@@ -681,7 +681,7 @@ __global__ void inverse_variance_kernel(int size, float *src, float *dst, float 
 extern "C" void inverse_variance_ongpu(int size, float *src, float *dst, float epsilon)
 {
     const int num_blocks = size / BLOCK + 1;
-    inverse_variance_kernel << <num_blocks, BLOCK, 0, get_cuda_stream() >> >(size, src, dst, epsilon);
+    inverse_variance_kernel <<<num_blocks, BLOCK, 0, get_cuda_stream() >>>(size, src, dst, epsilon);
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
@@ -706,7 +706,7 @@ extern "C" void normalize_scale_bias_gpu(float *x, float *mean, float *variance,
     const int current_size = batch * filters * spatial;
     const int num_blocks = get_number_of_blocks(current_size, BLOCK);
 
-    normalize_scale_bias_kernel << <num_blocks, BLOCK, 0, get_cuda_stream() >> >(current_size, x, mean, variance, scales, biases, batch, filters, spatial, inverse_variance, epsilon);
+    normalize_scale_bias_kernel <<<num_blocks, BLOCK, 0, get_cuda_stream() >>>(current_size, x, mean, variance, scales, biases, batch, filters, spatial, inverse_variance, epsilon);
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
@@ -747,7 +747,7 @@ extern "C" void copy_ongpu(int N, float * X, int INCX, float * Y, int INCY)
 extern "C" void simple_copy_ongpu(int size, float *src, float *dst)
 {
     const int num_blocks = size / BLOCK + 1;
-    simple_copy_kernel << <num_blocks, BLOCK, 0, get_cuda_stream() >> >(size, src, dst);
+    simple_copy_kernel <<<num_blocks, BLOCK, 0, get_cuda_stream() >>>(size, src, dst);
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
@@ -826,7 +826,7 @@ extern "C" void constrain_ongpu(int N, float ALPHA, float * X, int INCX)
 
 extern "C" void constrain_min_max_ongpu(int N, float MIN, float MAX, float * X, int INCX)
 {
-    constrain_min_max_kernel << <cuda_gridsize(N), BLOCK, 0, get_cuda_stream() >> >(N, MIN, MAX, X, INCX);
+    constrain_min_max_kernel <<<cuda_gridsize(N), BLOCK, 0, get_cuda_stream() >>>(N, MIN, MAX, X, INCX);
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
@@ -839,7 +839,7 @@ extern "C" void scal_ongpu(int N, float ALPHA, float * X, int INCX)
 
 extern "C" void scal_add_ongpu(int N, float ALPHA, float BETA, float * X, int INCX)
 {
-    scal_add_kernel << <cuda_gridsize(N), BLOCK, 0, get_cuda_stream() >> >(N, ALPHA, BETA, X, INCX);
+    scal_add_kernel <<<cuda_gridsize(N), BLOCK, 0, get_cuda_stream() >>>(N, ALPHA, BETA, X, INCX);
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
@@ -853,7 +853,7 @@ extern "C" void fill_ongpu(int N, float ALPHA, float * X, int INCX)
 {
     //fill_kernel<<<cuda_gridsize(N), BLOCK, 0, get_cuda_stream()>>>(N, ALPHA, X, INCX);
     //CHECK_CUDA(cudaPeekAtLastError());
-    fill_kernel << <get_number_of_blocks(N, BLOCK), BLOCK, 0, get_cuda_stream() >> >(N, ALPHA, X, INCX);
+    fill_kernel <<<get_number_of_blocks(N, BLOCK), BLOCK, 0, get_cuda_stream() >>>(N, ALPHA, X, INCX);
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
@@ -882,7 +882,7 @@ extern "C" void gradient_centralization_gpu(int w, int h, int c, int f, float *i
     const int f_size = c * h * w;
     if (f_size % WARP_SIZE == 0) {
 
-        gradient_centralization_kernel << <get_number_of_blocks(size, BLOCK), BLOCK, 0, get_cuda_stream() >> > (f, f_size, in);
+        gradient_centralization_kernel <<<get_number_of_blocks(size, BLOCK), BLOCK, 0, get_cuda_stream() >>> (f, f_size, in);
         CHECK_CUDA(cudaPeekAtLastError());
     }
 }
@@ -1001,10 +1001,10 @@ extern "C" void shortcut_multilayer_gpu(int src_outputs, int batch, int n, int *
     //printf(" src_outputs = %d, batch = %d, n = %d \n", src_outputs, batch, n);
     int size = batch * src_outputs;
     if (nweights == 0 && n == 1) {
-        shortcut_singlelayer_simple_kernel << <cuda_gridsize(size), BLOCK, 0, get_cuda_stream() >> > (size, src_outputs, batch, n, outputs_of_layers_gpu, layers_output_gpu, out, in, weights_gpu, nweights, weights_normalization);
+        shortcut_singlelayer_simple_kernel <<<cuda_gridsize(size), BLOCK, 0, get_cuda_stream() >>> (size, src_outputs, batch, n, outputs_of_layers_gpu, layers_output_gpu, out, in, weights_gpu, nweights, weights_normalization);
     }
     else {
-        shortcut_multilayer_kernel << <cuda_gridsize(size), BLOCK, 0, get_cuda_stream() >> > (size, src_outputs, batch, n, outputs_of_layers_gpu, layers_output_gpu, out, in, weights_gpu, nweights, weights_normalization);
+        shortcut_multilayer_kernel <<<cuda_gridsize(size), BLOCK, 0, get_cuda_stream() >>> (size, src_outputs, batch, n, outputs_of_layers_gpu, layers_output_gpu, out, in, weights_gpu, nweights, weights_normalization);
     }
     CHECK_CUDA(cudaPeekAtLastError());
 }
@@ -1131,7 +1131,7 @@ extern "C" void backward_shortcut_multilayer_gpu(int src_outputs, int batch, int
 
     //printf(" src_outputs = %d, batch = %d, n = %d \n", src_outputs, batch, n);
     int size = batch * src_outputs;
-    backward_shortcut_multilayer_kernel << <cuda_gridsize(size), BLOCK, 0, get_cuda_stream() >> > (size, src_outputs, batch, n, outputs_of_layers_gpu,
+    backward_shortcut_multilayer_kernel <<<cuda_gridsize(size), BLOCK, 0, get_cuda_stream() >>> (size, src_outputs, batch, n, outputs_of_layers_gpu,
         layers_delta_gpu, delta_out, delta_in, weights_gpu, weight_updates_gpu, nweights, in, layers_output_gpu, weights_normalization);
     CHECK_CUDA(cudaPeekAtLastError());
 }
@@ -1200,7 +1200,7 @@ extern "C" void input_shortcut_gpu(float *in, int batch, int w1, int h1, int c1,
 {
     if (w1 == w2 && h1 == h2 && c1 == c2) {
         int size = batch * w1 * h1 * c1;
-        simple_input_shortcut_kernel << <cuda_gridsize(size), BLOCK, 0, get_cuda_stream() >> >(in, size, add, out);
+        simple_input_shortcut_kernel <<<cuda_gridsize(size), BLOCK, 0, get_cuda_stream() >>>(in, size, add, out);
         CHECK_CUDA(cudaPeekAtLastError());
         return;
     }
@@ -1217,9 +1217,9 @@ extern "C" void input_shortcut_gpu(float *in, int batch, int w1, int h1, int c1,
     if (sample < 1) sample = 1;
 
     int size = batch * minw * minh * minc;
-    //input_shortcut_kernel << <cuda_gridsize(size), BLOCK, 0, get_cuda_stream() >> >(in, size, minw, minh, minc, stride, sample, batch, w1, h1, c1, add, w2, h2, c2, out);
+    //input_shortcut_kernel <<<cuda_gridsize(size), BLOCK, 0, get_cuda_stream() >>>(in, size, minw, minh, minc, stride, sample, batch, w1, h1, c1, add, w2, h2, c2, out);
     simple_copy_ongpu(w2 * h2 * c2 * batch, in, out);
-    shortcut_kernel << <cuda_gridsize(size), BLOCK, 0, get_cuda_stream() >> >(size, minw, minh, minc, stride, sample, batch, w1, h1, c1, add, w2, h2, c2, out);
+    shortcut_kernel <<<cuda_gridsize(size), BLOCK, 0, get_cuda_stream() >>>(size, minw, minh, minc, stride, sample, batch, w1, h1, c1, add, w2, h2, c2, out);
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
@@ -1259,7 +1259,7 @@ __global__ void softmax_x_ent_kernel(int n, float *pred, float *truth, float *de
 
 extern "C" void softmax_x_ent_gpu(int n, float *pred, float *truth, float *delta, float *error)
 {
-	softmax_x_ent_kernel << <cuda_gridsize(n), BLOCK, 0, get_cuda_stream() >> >(n, pred, truth, delta, error);
+	softmax_x_ent_kernel <<<cuda_gridsize(n), BLOCK, 0, get_cuda_stream() >>>(n, pred, truth, delta, error);
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
@@ -1390,7 +1390,7 @@ __global__ void softmax_kernel_new_api(float *input, int n, int batch, int batch
 
 extern "C" void softmax_gpu_new_api(float *input, int n, int batch, int batch_offset, int groups, int group_offset, int stride, float temp, float *output)
 {
-	softmax_kernel_new_api << <cuda_gridsize(batch*groups), BLOCK, 0, get_cuda_stream() >> >(input, n, batch, batch_offset, groups, group_offset, stride, temp, output);
+	softmax_kernel_new_api <<<cuda_gridsize(batch*groups), BLOCK, 0, get_cuda_stream() >>>(input, n, batch, batch_offset, groups, group_offset, stride, temp, output);
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
@@ -1422,7 +1422,7 @@ __global__ void upsample_kernel(size_t N, float *x, int w, int h, int c, int bat
 extern "C" void upsample_gpu(float *in, int w, int h, int c, int batch, int stride, int forward, float scale, float *out)
 {
     size_t size = w*h*c*batch*stride*stride;
-    upsample_kernel << <cuda_gridsize(size), BLOCK, 0, get_cuda_stream() >> >(size, in, w, h, c, batch, stride, forward, scale, out);
+    upsample_kernel <<<cuda_gridsize(size), BLOCK, 0, get_cuda_stream() >>>(size, in, w, h, c, batch, stride, forward, scale, out);
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
@@ -1474,7 +1474,7 @@ extern "C" void fix_nan_and_inf(float *input, size_t size)
 {
     const int block_size = BLOCK;
     const int num_blocks = get_number_of_blocks(size, block_size);
-    fix_nan_and_inf_kernel << <num_blocks, block_size, 0, get_cuda_stream() >> >(input, size);
+    fix_nan_and_inf_kernel <<<num_blocks, block_size, 0, get_cuda_stream() >>>(input, size);
     CHECK_CUDA(cudaPeekAtLastError());
     //CHECK_CUDA(cudaDeviceSynchronize());
 }
@@ -1495,7 +1495,7 @@ extern "C" void reset_nan_and_inf(float *input, size_t size)
 {
     const int block_size = BLOCK;
     const int num_blocks = get_number_of_blocks(size, block_size);
-    reset_nan_and_inf_kernel << <num_blocks, block_size, 0, get_cuda_stream() >> >(input, size);
+    reset_nan_and_inf_kernel <<<num_blocks, block_size, 0, get_cuda_stream() >>>(input, size);
     CHECK_CUDA(cudaPeekAtLastError());
     //CHECK_CUDA(cudaDeviceSynchronize());
 }
@@ -1520,7 +1520,7 @@ extern "C" int is_nan_or_inf(float *input, size_t size)
 
     const int block_size = BLOCK;
     const int num_blocks = get_number_of_blocks(size, block_size);
-    is_nan_or_inf_kernel << <num_blocks, block_size, 0, get_cuda_stream() >> >(input, size, pinned_return);
+    is_nan_or_inf_kernel <<<num_blocks, block_size, 0, get_cuda_stream() >>>(input, size, pinned_return);
     CHECK_CUDA(cudaDeviceSynchronize());
     int ret_val = *pinned_return;
 
@@ -1551,7 +1551,7 @@ extern "C" void add_3_arrays_activate(float *a1, float *a2, float *a3, size_t si
         printf(" add_3_arrays_activate() doesn't support activation %d, it supports only LOGISTIC and TANH \n", a);
         exit(EXIT_FAILURE);
     }
-    add_3_arrays_activate_kernel << <num_blocks, block_size, 0, get_cuda_stream() >> >(a1, a2, a3, size, a, dst);
+    add_3_arrays_activate_kernel <<<num_blocks, block_size, 0, get_cuda_stream() >>>(a1, a2, a3, size, a, dst);
 }
 
 
@@ -1567,7 +1567,7 @@ extern "C" void sum_of_mults(float *a1, float *a2, float *b1, float *b2,  size_t
 {
     const int block_size = BLOCK;
     const int num_blocks = get_number_of_blocks(size, block_size);
-    sum_of_mults_kernel << <num_blocks, block_size, 0, get_cuda_stream() >> >(a1, a2, b1, b2, size, dst);
+    sum_of_mults_kernel <<<num_blocks, block_size, 0, get_cuda_stream() >>>(a1, a2, b1, b2, size, dst);
 }
 
 
@@ -1590,7 +1590,7 @@ extern "C" void activate_and_mult(float *a1, float *a2, size_t size, ACTIVATION 
         printf(" activat_and_mult() doesn't support activation %d, it supports only TANH \n", a);
         exit(EXIT_FAILURE);
     }
-    activate_and_mult_kernel << <num_blocks, block_size, 0, get_cuda_stream() >> >(a1, a2, size, a, dst);
+    activate_and_mult_kernel <<<num_blocks, block_size, 0, get_cuda_stream() >>>(a1, a2, size, a, dst);
 }
 
 
@@ -1614,7 +1614,7 @@ extern "C" void scale_channels_gpu(float *in_w_h_c, int size, int channel_size, 
 {
     const int block_size = BLOCK;
     const int num_blocks = get_number_of_blocks(size, block_size);
-    scale_channels_kernel << <num_blocks, block_size, 0, get_cuda_stream() >> >(in_w_h_c, size, channel_size, batch_size, scale_wh, scales_c, out);
+    scale_channels_kernel <<<num_blocks, block_size, 0, get_cuda_stream() >>>(in_w_h_c, size, channel_size, batch_size, scale_wh, scales_c, out);
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
@@ -1671,7 +1671,7 @@ extern "C" void backward_scale_channels_gpu(float *in_w_h_c_delta, int size, int
 {
     const int block_size = BLOCK;
     const int num_blocks = get_number_of_blocks(size, block_size);
-    backward_scale_channels_kernel << <num_blocks, block_size, 0, get_cuda_stream() >> > (in_w_h_c_delta, size, channel_size, batch_size, scale_wh,
+    backward_scale_channels_kernel <<<num_blocks, block_size, 0, get_cuda_stream() >>> (in_w_h_c_delta, size, channel_size, batch_size, scale_wh,
         in_scales_c, out_from_delta,
         in_from_output, out_state_delta);
 
@@ -1691,7 +1691,7 @@ extern "C" void sam_gpu(float *in_w_h_c, int size, int channel_size, float *scal
 {
     const int block_size = BLOCK;
     const int num_blocks = get_number_of_blocks(size, block_size);
-    sam_kernel << <num_blocks, block_size, 0, get_cuda_stream() >> >(in_w_h_c, size, channel_size, scales_c, out);
+    sam_kernel <<<num_blocks, block_size, 0, get_cuda_stream() >>>(in_w_h_c, size, channel_size, scales_c, out);
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
@@ -1716,7 +1716,7 @@ extern "C" void backward_sam_gpu(float *in_w_h_c_delta, int size, int channel_si
 {
     const int block_size = BLOCK;
     const int num_blocks = get_number_of_blocks(size, block_size);
-    backward_sam_kernel << <num_blocks, block_size, 0, get_cuda_stream() >> > (in_w_h_c_delta, size, channel_size,
+    backward_sam_kernel <<<num_blocks, block_size, 0, get_cuda_stream() >>> (in_w_h_c_delta, size, channel_size,
         in_scales_c, out_from_delta,
         in_from_output, out_state_delta);
 
@@ -1802,7 +1802,7 @@ extern "C" void smooth_rotate_weights_gpu(const float *src_weight_gpu, float *we
     const int kernel_area = size*size;
     const int block_size = BLOCK;
     const int num_blocks = get_number_of_blocks(nweights / kernel_area, block_size);
-    smooth_rotate_weights_kernel << <num_blocks, block_size, 0, get_cuda_stream() >> > (src_weight_gpu, weight_deform_gpu, nweights, n, size, angle, reverse);
+    smooth_rotate_weights_kernel <<<num_blocks, block_size, 0, get_cuda_stream() >>> (src_weight_gpu, weight_deform_gpu, nweights, n, size, angle, reverse);
 
     CHECK_CUDA(cudaPeekAtLastError());
 }
@@ -1900,7 +1900,7 @@ extern "C" void stretch_weights_gpu(const float *src_weight_gpu, float *weight_d
     const int kernel_area = size*size;
     const int block_size = BLOCK;
     const int num_blocks = get_number_of_blocks(nweights / kernel_area, block_size);
-    stretch_weights_kernel << <num_blocks, block_size, 0, get_cuda_stream() >> > (src_weight_gpu, weight_deform_gpu, nweights, n, size, scale, reverse);
+    stretch_weights_kernel <<<num_blocks, block_size, 0, get_cuda_stream() >>> (src_weight_gpu, weight_deform_gpu, nweights, n, size, scale, reverse);
 
     CHECK_CUDA(cudaPeekAtLastError());
 }
@@ -2006,7 +2006,7 @@ extern "C" void sway_and_flip_weights_gpu(const float *src_weight_gpu, float *we
     const int kernel_area = size*size;
     const int block_size = BLOCK;
     const int num_blocks = get_number_of_blocks(nweights / kernel_area, block_size);
-    sway_and_flip_weights_kernel << <num_blocks, block_size, 0, get_cuda_stream() >> > (src_weight_gpu, weight_deform_gpu, nweights, n, size, angle, reverse);
+    sway_and_flip_weights_kernel <<<num_blocks, block_size, 0, get_cuda_stream() >>> (src_weight_gpu, weight_deform_gpu, nweights, n, size, angle, reverse);
 
     CHECK_CUDA(cudaPeekAtLastError());
 }
@@ -2089,7 +2089,7 @@ extern "C" void rotate_weights_gpu(const float *src_weight_gpu, float *weight_de
     const int kernel_area = size*size;
     const int block_size = BLOCK;
     const int num_blocks = get_number_of_blocks(nweights / kernel_area, block_size);
-    rotate_weights_kernel << <num_blocks, block_size, 0, get_cuda_stream() >> > (src_weight_gpu, weight_deform_gpu, nweights, n, size, reverse);
+    rotate_weights_kernel <<<num_blocks, block_size, 0, get_cuda_stream() >>> (src_weight_gpu, weight_deform_gpu, nweights, n, size, reverse);
 
     CHECK_CUDA(cudaPeekAtLastError());
 }
@@ -2256,7 +2256,7 @@ extern "C" void stretch_sway_flip_weights_gpu(const float *src_weight_gpu, float
     const int kernel_area = size*size;
     const int block_size = BLOCK;
     const int num_blocks = get_number_of_blocks(nweights / kernel_area, block_size);
-    stretch_sway_flip_weights_kernel << <num_blocks, block_size, 0, get_cuda_stream() >> > (src_weight_gpu, weight_deform_gpu, nweights, n, size, angle, reverse);
+    stretch_sway_flip_weights_kernel <<<num_blocks, block_size, 0, get_cuda_stream() >>> (src_weight_gpu, weight_deform_gpu, nweights, n, size, angle, reverse);
 
     CHECK_CUDA(cudaPeekAtLastError());
 }
@@ -2283,7 +2283,7 @@ extern "C" void reduce_and_expand_array_gpu(const float *src_gpu, float *dst_gpu
     const int current_size = size / groups;
     const int block_size = BLOCK;
     const int num_blocks = get_number_of_blocks(current_size, block_size);
-    reduce_and_expand_array_kernel << <num_blocks, block_size, 0, get_cuda_stream() >> > (src_gpu, dst_gpu, current_size, groups);
+    reduce_and_expand_array_kernel <<<num_blocks, block_size, 0, get_cuda_stream() >>> (src_gpu, dst_gpu, current_size, groups);
 
     CHECK_CUDA(cudaPeekAtLastError());
 }
@@ -2306,7 +2306,7 @@ extern "C" void expand_array_gpu(const float *src_gpu, float *dst_gpu, int size,
     const int current_size = size / groups;
     const int block_size = BLOCK;
     const int num_blocks = get_number_of_blocks(current_size, block_size);
-    expand_array_kernel << <num_blocks, block_size, 0, get_cuda_stream() >> > (src_gpu, dst_gpu, current_size, groups);
+    expand_array_kernel <<<num_blocks, block_size, 0, get_cuda_stream() >>> (src_gpu, dst_gpu, current_size, groups);
 
     CHECK_CUDA(cudaPeekAtLastError());
 }
@@ -2338,7 +2338,7 @@ extern "C" void mult_inverse_array_gpu(const float *src_gpu, float *dst_gpu, int
 {
     const int block_size = BLOCK;
     const int num_blocks = get_number_of_blocks(size, block_size);
-    mult_inverse_array_kernel << <num_blocks, block_size, 0, get_cuda_stream() >> > (src_gpu, dst_gpu, size, eps, divider, clip, abs_add);
+    mult_inverse_array_kernel <<<num_blocks, block_size, 0, get_cuda_stream() >>> (src_gpu, dst_gpu, size, eps, divider, clip, abs_add);
 
     CHECK_CUDA(cudaPeekAtLastError());
 }
@@ -2383,7 +2383,7 @@ extern "C" void P_constrastive_f_det_gpu(int *labels, unsigned int feature_size,
 {
     const int block_size = BLOCK;
     const int num_blocks = get_number_of_blocks(contrast_p_size, block_size);
-    P_constrastive_f_det_kernel << <num_blocks, block_size, 0, get_cuda_stream() >> > (labels, feature_size, temperature, contrast_p, contrast_p_size);
+    P_constrastive_f_det_kernel <<<num_blocks, block_size, 0, get_cuda_stream() >>> (labels, feature_size, temperature, contrast_p, contrast_p_size);
 
     CHECK_CUDA(cudaPeekAtLastError());
 }
@@ -2430,7 +2430,7 @@ extern "C" void coord_conv_gpu(float *dst, int size, int w, int h, int chan, int
 {
     const int block_size = BLOCK;
     const int num_blocks = get_number_of_blocks(size, block_size);
-    coord_conv_kernel << <num_blocks, block_size, 0, get_cuda_stream() >> > (dst, w, h, chan, b, type);
+    coord_conv_kernel <<<num_blocks, block_size, 0, get_cuda_stream() >>> (dst, w, h, chan, b, type);
 
     CHECK_CUDA(cudaPeekAtLastError());
 }

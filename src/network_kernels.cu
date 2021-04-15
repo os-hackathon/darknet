@@ -692,9 +692,12 @@ float *network_predict_gpu(network net, float *input)
     state.delta = 0;
 
     //cudaGraphExec_t instance = (cudaGraphExec_t)net.cuda_graph_exec;
+#ifdef __NVCC__
     static cudaGraphExec_t instance;
+#endif
 
     if ((*net.cuda_graph_ready) == 0) {
+#ifdef __NVCC__
         static cudaGraph_t graph;
         if (net.use_cuda_graph == 1) {
             int i;
@@ -706,10 +709,12 @@ float *network_predict_gpu(network net, float *input)
             //cudaGraph_t graph = (cudaGraph_t)net.cuda_graph;
             CHECK_CUDA(cudaStreamBeginCapture(stream0, cudaStreamCaptureModeGlobal));
         }
+#endif
 
         cuda_push_array(state.input, net.input_pinned_cpu, size);
         forward_network_gpu(net, state);
 
+#ifdef __NVCC__
         if (net.use_cuda_graph == 1) {
             cudaStream_t stream0 = switch_stream(0);
             CHECK_CUDA(cudaStreamEndCapture(stream0, &graph));
@@ -718,14 +723,17 @@ float *network_predict_gpu(network net, float *input)
             printf(" graph is captured... \n");
             CHECK_CUDA(cudaDeviceSynchronize());
         }
+#endif
         CHECK_CUDA(cudaStreamSynchronize(get_cuda_stream()));
     }
     else {
+#ifdef __NVCC__
         cudaStream_t stream0 = switch_stream(0);
         //printf(" cudaGraphLaunch \n");
         CHECK_CUDA( cudaGraphLaunch(instance, stream0) );
         CHECK_CUDA( cudaStreamSynchronize(stream0) );
         //printf(" ~cudaGraphLaunch \n");
+#endif
     }
 
     float *out = get_network_output_gpu(net);

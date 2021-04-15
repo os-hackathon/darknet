@@ -1,4 +1,5 @@
 USE_HIP=1
+HIP_PLATFORM=hcc
 GPU=1
 CUDNN=0
 CUDNN_HALF=0
@@ -84,8 +85,11 @@ NVCC=nvcc
 OPTS=-O3
 LDFLAGS= -lm -Xcompiler="-pthread"
 COMMON= -Iinclude/ -I3rdparty/stb/include
-#CFLAGS=-Wall -Wfatal-errors -Wno-unused-result -Wno-unknown-pragmas -fPIC
-CFLAGS=
+ifeq ($(USE_HIP), 1)
+  CFLAGS=
+else
+  CFLAGS=-Wall -Wfatal-errors -Wno-unused-result -Wno-unknown-pragmas -fPIC
+endif
 
 
 ifeq ($(DEBUG), 1)
@@ -123,17 +127,19 @@ endif
 
 ifeq ($(USE_HIP), 1)
 
-  CC=hipcc -v
-  CPP=hipcc -v
-  NVCC=hipcc -v
+  CC=hipcc
+  CPP=hipcc
+  NVCC=hipcc
 
   ifeq ($(HIP_PLATFORM),hcc)
     COMMON+= -DGPU -D__HIP_PLATFORM_HCC__ -I/opt/rocm/include/hiprand -I/opt/rocm/include/rocrand -I/opt/rocm/include/
-    CFLAGS+= -x c++ -DGPU
+    CFLAGS+=-DGPU
+    CPPFLAGS+= -x c++ -x hip
     LDFLAGS+= -L/opt/rocm/lib/ -lhipblas -lhiprand -lrocrand
   else ifeq ($(HIP_PLATFORM),nvcc)
     COMMON+= -DGPU -I/usr/local/cuda/include
     CFLAGS+= -DGPU
+    CPPFLAGS+= -x c++
     LDFLAGS+= -L/usr/local/cuda/lib64 -lcuda -lcudart -lcublas -lcurand
   endif
 
@@ -201,19 +207,19 @@ $(APPNAMESO): $(LIBNAMESO) include/yolo_v2_class.hpp src/yolo_console_dll.cpp
 endif
 
 ifeq ($(USE_HIP),1)
-NVCCFLAGS=$(CFLAGS)
+NVCCFLAGS=$(CFLAGS) $(CPPFLAGS)
 else
-NVCCFLAGS='--compiler-options "$(CFLAGS)"'
+NVCCFLAGS='--compiler-options "$(CFLAGS) $(CPPFLAGS)"'
 endif
 
 $(EXEC): $(OBJS)
-	$(CPP) -std=c++11 $(COMMON) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+	$(CPP) -v -std=c++11 $(COMMON) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 $(OBJDIR)%.o: %.c $(DEPS)
-	$(CC) $(COMMON) $(CFLAGS) -c $< -o $@
+	$(CC) $(COMMON) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
 $(OBJDIR)%.o: %.cpp $(DEPS)
-	$(CPP) -std=c++11 $(COMMON) $(CFLAGS) -c $< -o $@
+	$(CPP) -std=c++11 $(COMMON) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
 $(OBJDIR)%.o: %.cu $(DEPS)
 	$(NVCC) $(ARCH) $(COMMON) $(NVCCFLAGS) -c $< -o $@
