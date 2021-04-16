@@ -3,7 +3,9 @@
 # Hipify all sources
 cd src
 for f in *.cu; do 
-  hipify-perl -inplace $f; 
+  hipify-perl -inplace $f;
+  sed -i 's/<< </<<</g' *
+  sed -i 's/>> >/>>>/g' *
 done
 
 for f in *.c; do
@@ -16,3 +18,7 @@ done
 cd ..
 
 hipify-perl -inplace include/darknet.h
+
+# Build for AMD GPUs
+HIP_PLATFORM=amd make          # For ROCM 4.1
+# HIP_PLATFORM=hcc make        # For ROCM 4.0
