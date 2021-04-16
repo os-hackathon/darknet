@@ -1,5 +1,8 @@
+USE_ROCM=1
+HIP_PLATFORM=nvcc
+
 GPU=1
-CUDNN=1
+CUDNN=0
 CUDNN_HALF=0
 OPENCV=0
 AVX=0
@@ -17,10 +20,14 @@ ZED_CAMERA_v2_8=0
 USE_CPP=0
 DEBUG=0
 
+ifeq ($(HIP_PLATFORM), nvcc)
 ARCH= -gencode arch=compute_35,code=sm_35 \
       -gencode arch=compute_50,code=[sm_50,compute_50] \
       -gencode arch=compute_52,code=[sm_52,compute_52] \
-	    -gencode arch=compute_61,code=[sm_61,compute_61]
+      -gencode arch=compute_61,code=[sm_61,compute_61] \
+      -gencode arch=compute_70,code=[sm_70,compute_70] \
+      -gencode arch=compute_72,code=[sm_72,compute_72]
+endif
 
 OS := $(shell uname)
 
@@ -67,6 +74,7 @@ LIBNAMESO=libdarknet.so
 APPNAMESO=uselib
 endif
 
+
 ifeq ($(USE_CPP), 1)
 CC=g++
 else
@@ -75,10 +83,15 @@ endif
 
 CPP=g++ -std=c++11
 NVCC=nvcc
-OPTS=-Ofast
-LDFLAGS= -lm -pthread
+OPTS=-O3
+LDFLAGS= -lm -Xcompiler="-pthread"
 COMMON= -Iinclude/ -I3rdparty/stb/include
-CFLAGS=-Wall -Wfatal-errors -Wno-unused-result -Wno-unknown-pragmas -fPIC
+ifeq ($(USE_ROCM), 1)
+  CFLAGS=
+else
+  CFLAGS=-Wall -Wfatal-errors -Wno-unused-result -Wno-unknown-pragmas -fPIC
+endif
+
 
 ifeq ($(DEBUG), 1)
 #OPTS= -O0 -g
@@ -113,14 +126,36 @@ ifeq ($(OPENMP), 1)
 LDFLAGS+= -lgomp
 endif
 
-ifeq ($(GPU), 1)
-COMMON+= -DGPU -I/usr/local/cuda/include/
-CFLAGS+= -DGPU
-ifeq ($(OS),Darwin) #MAC
-LDFLAGS+= -L/usr/local/cuda/lib -lcuda -lcudart -lcublas -lcurand
+ifeq ($(USE_ROCM), 1)
+
+  CC=hipcc
+  CPP=hipcc
+  NVCC=hipcc
+
+  ifeq ($(HIP_PLATFORM),hcc)
+    COMMON+= -DGPU -D__HIP_PLATFORM_HCC__ -I/opt/rocm/include/hiprand -I/opt/rocm/include/rocrand -I/opt/rocm/include/
+    CFLAGS+=-DGPU
+    CPPFLAGS+= -x c++ -x hip
+    LDFLAGS+= -L/opt/rocm/lib/ -lhipblas -lhiprand -lrocrand
+  else ifeq ($(HIP_PLATFORM),nvcc)
+    COMMON+= -DGPU -D__HIP_PLATFORM_NVCC__ -I/usr/local/cuda/include
+    CFLAGS+= -DGPU
+    CPPFLAGS+= -x c++
+    LDFLAGS+= -L/usr/local/cuda/lib64 -lcuda -lcudart -lcublas -lcurand
+  endif
+
 else
-LDFLAGS+= -L/usr/local/cuda/lib64 -lcuda -lcudart -lcublas -lcurand
-endif
+
+  ifeq ($(GPU), 1)
+    COMMON+= -DGPU -I/usr/local/cuda/include/
+    CFLAGS+= -DGPU
+    ifeq ($(OS),Darwin) #MAC
+      LDFLAGS+= -L/usr/local/cuda/lib -lcuda -lcudart -lcublas -lcurand
+    else
+      LDFLAGS+= -L/usr/local/cuda/lib64 -lcuda -lcudart -lcublas -lcurand
+    endif
+  endif
+
 endif
 
 ifeq ($(CUDNN), 1)
@@ -172,17 +207,23 @@ $(APPNAMESO): $(LIBNAMESO) include/yolo_v2_class.hpp src/yolo_console_dll.cpp
 	$(CPP) -std=c++11 $(COMMON) $(CFLAGS) -o $@ src/yolo_console_dll.cpp $(LDFLAGS) -L ./ -l:$(LIBNAMESO)
 endif
 
+ifeq ($(USE_ROCM),1)
+NVCCFLAGS=$(CFLAGS) $(CPPFLAGS)
+else
+NVCCFLAGS='--compiler-options "$(CFLAGS) $(CPPFLAGS)"'
+endif
+
 $(EXEC): $(OBJS)
-	$(CPP) -std=c++11 $(COMMON) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+	$(CPP) -v -std=c++11 $(COMMON) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 $(OBJDIR)%.o: %.c $(DEPS)
-	$(CC) -std=c99 $(COMMON) $(CFLAGS) -c $< -o $@
+	$(CC) $(COMMON) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
 $(OBJDIR)%.o: %.cpp $(DEPS)
-	$(CPP) -std=c++11 $(COMMON) $(CFLAGS) -c $< -o $@
+	$(CPP) -std=c++11 $(COMMON) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
 $(OBJDIR)%.o: %.cu $(DEPS)
-	$(NVCC) $(ARCH) $(COMMON) --compiler-options "$(CFLAGS)" -c $< -o $@
+	$(NVCC) $(ARCH) $(COMMON) $(NVCCFLAGS) -c $< -o $@
 
 $(OBJDIR):
 	mkdir -p $(OBJDIR)

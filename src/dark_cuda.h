@@ -20,11 +20,7 @@ extern int gpu_index;
 #define WARP_SIZE 32
 #define BLOCK_TRANSPOSE32 256
 
-#include <cuda.h>
-#include <cuda_runtime.h>
-#include <curand.h>
-#include <cublas_v2.h>
-#include <cuda_runtime_api.h>
+#include "gpu.hpp"
 //#include <driver_types.h>
 
 #ifdef CUDNN

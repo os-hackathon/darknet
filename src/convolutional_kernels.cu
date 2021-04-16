@@ -1,6 +1,4 @@
-#include <cuda_runtime.h>
-#include <curand.h>
-#include <cublas_v2.h>
+#include "gpu.hpp"
 
 #include "convolutional_layer.h"
 #include "batchnorm_layer.h"
@@ -65,7 +63,7 @@ __global__ void binarize_weights_kernel(float *weights, int n, int size, float *
 
 void binarize_weights_gpu(float *weights, int n, int size, float *binary)
 {
-    binarize_weights_kernel << <cuda_gridsize(n), BLOCK, 0, get_cuda_stream() >> >(weights, n, size, binary);
+    binarize_weights_kernel <<<cuda_gridsize(n), BLOCK, 0, get_cuda_stream() >>>(weights, n, size, binary);
     CHECK_CUDA(cudaPeekAtLastError());
 }
 
@@ -113,9 +111,9 @@ void fast_binarize_weights_gpu(float *weights, int n, int size, float *binary, f
         size_t gridsize = n * size;
         const int num_blocks = get_number_of_blocks(gridsize, BLOCK);// gridsize / BLOCK + 1;
 
-        set_zero_kernel << <(n/BLOCK + 1), BLOCK, 0, get_cuda_stream() >> > (mean_arr_gpu, n);
-        reduce_kernel << <num_blocks, BLOCK, 0, get_cuda_stream() >> > (weights, n, size, mean_arr_gpu);
-        binarize_weights_mean_kernel << <num_blocks, BLOCK, 0, get_cuda_stream() >> > (weights, n, size, binary, mean_arr_gpu);
+        set_zero_kernel <<<(n/BLOCK + 1), BLOCK, 0, get_cuda_stream() >>> (mean_arr_gpu, n);
+        reduce_kernel <<<num_blocks, BLOCK, 0, get_cuda_stream() >>> (weights, n, size, mean_arr_gpu);
+        binarize_weights_mean_kernel <<<num_blocks, BLOCK, 0, get_cuda_stream() >>> (weights, n, size, binary, mean_arr_gpu);
         CHECK_CUDA(cudaPeekAtLastError());
     }
     else {
@@ -995,7 +993,7 @@ void calc_avg_activation_gpu(float *src, float *dst, int size, int channels, int
 {
     const int num_blocks = get_number_of_blocks(size*batches, BLOCK);
 
-    calc_avg_activation_kernel << <num_blocks, BLOCK, 0, get_cuda_stream() >> > (src, dst, size, channels, batches);
+    calc_avg_activation_kernel <<<num_blocks, BLOCK, 0, get_cuda_stream() >>> (src, dst, size, channels, batches);
 }
 
 
@@ -1019,7 +1017,7 @@ void assisted_activation_gpu(float alpha, float *output, float *gt_gpu, float *a
 {
     const int num_blocks = get_number_of_blocks(size*batches, BLOCK);
 
-    assisted_activation_kernel << <num_blocks, BLOCK, 0, get_cuda_stream() >> > (alpha, output, gt_gpu, a_avg_gpu, size, channels, batches);
+    assisted_activation_kernel <<<num_blocks, BLOCK, 0, get_cuda_stream() >>> (alpha, output, gt_gpu, a_avg_gpu, size, channels, batches);
 }
 
 
@@ -1043,7 +1041,7 @@ void assisted_activation2_gpu(float alpha, float *output, float *gt_gpu, float *
 {
     const int num_blocks = get_number_of_blocks(size*batches, BLOCK);
 
-    assisted_activation2_kernel << <num_blocks, BLOCK, 0, get_cuda_stream() >> > (alpha, output, gt_gpu, a_avg_gpu, size, channels, batches);
+    assisted_activation2_kernel <<<num_blocks, BLOCK, 0, get_cuda_stream() >>> (alpha, output, gt_gpu, a_avg_gpu, size, channels, batches);
 }
 
 void assisted_excitation_forward_gpu(convolutional_layer l, network_state state)

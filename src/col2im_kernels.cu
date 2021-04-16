@@ -1,6 +1,4 @@
-#include <cuda_runtime.h>
-#include <curand.h>
-#include <cublas_v2.h>
+#include "gpu.hpp"
 
 #include "col2im.h"
 #include "dark_cuda.h"
@@ -126,8 +124,8 @@ void col2im_gpu_ext(const float* data_col, const int channels,
     // To avoid involving atomic operations, we will launch one kernel per
     // bottom dimension, and then in the kernel add up the top dimensions.
     // NOLINT_NEXT_LINE(whitespace/operators)
-    col2im_gpu_kernel_ext<< <CAFFE_GET_BLOCKS(num_kernels),
-        CAFFE_CUDA_NUM_THREADS >> >(
+    col2im_gpu_kernel_ext<<<CAFFE_GET_BLOCKS(num_kernels),
+        CAFFE_CUDA_NUM_THREADS >>>(
             num_kernels, data_col, height, width, channels, kernel_h, kernel_w,
             pad_h, pad_w, stride_h, stride_w, dilation_h, dilation_w,
             height_col, width_col, data_im);
