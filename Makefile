@@ -126,7 +126,8 @@ endif
 
 ifeq ($(GPU), 1)
 ifeq ($(USE_ROCM), 1)
-COMMON+= -DGPU -I/opt/rocm/hip/include/ # -I/opt/rocm/include/
+COMMON+= -DGPU -I/opt/rocm/hip/include/
+HIPCCFLAGS= -x c++ -x hip --cuda-compile-host-device
 CFLAGS+= -D__HIP_PLATFORM_HCC__
 else
 COMMON+= -DGPU -I/usr/local/cuda/include/
@@ -136,8 +137,7 @@ ifeq ($(OS),Darwin) #MAC
 LDFLAGS+= -L/usr/local/cuda/lib -lcuda -lcudart -lcublas -lcurand
 else
 ifeq ($(USE_ROCM), 1)
-#LDFLAGS+= -L/opt/rocm/lib -L/opt/rocm/hip/lib -lamdhip -lhipblas -lhiprand
-LDFLAGS+= -L/opt/rocm/hip/lib -lamdhip -lhipblas -lhiprand
+LDFLAGS+= -L/opt/rocm/lib -lhipblas -lhiprand -lrocrand
 COMMON+= -I/opt/rocm/hiprand/include -I/opt/rocm/rocrand/include -I/opt/rocm/hipblas/include
 else
 LDFLAGS+= -L/usr/local/cuda/lib64 -lcuda -lcudart -lcublas -lcurand
@@ -204,13 +204,13 @@ $(EXEC): $(OBJS)
 	$(CPP) -std=c++11 $(COMMON) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 $(OBJDIR)%.o: %.c $(DEPS)
-	$(CC) $(COMMON) $(CFLAGS) -c $< -o $@
+	$(CC) $(COMMON) $(CFLAGS) $(HIPCCFLAGS) -c $< -o $@
 
 $(OBJDIR)%.o: %.cpp $(DEPS)
-	$(CPP) -std=c++11 $(COMMON) $(CFLAGS) -c $< -o $@
+	$(CPP) -std=c++11 $(COMMON) $(CFLAGS) $(HIPCCFLAGS) -c $< -o $@
 
 $(OBJDIR)%.o: %.cu $(DEPS)
-	$(NVCC) $(ARCH) $(COMMON) $(NVCCFLAGS) -c $< -o $@
+	$(NVCC) $(ARCH) $(COMMON) $(NVCCFLAGS) $(HIPCCFLAGS) -c $< -o $@
 
 $(OBJDIR):
 	mkdir -p $(OBJDIR)
