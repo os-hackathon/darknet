@@ -4,8 +4,8 @@
 cd src
 for f in *.cu; do 
   hipify-perl -inplace $f;
-  sed -i 's/<< </<<</g' *
-  sed -i 's/>> >/>>>/g' *
+  sed -i 's/<< </<<</g' $f
+  sed -i 's/>> >/>>>/g' $f
 done
 
 for f in *.c; do
