@@ -18,7 +18,7 @@ ZED_CAMERA_v2_8=0
 # set ZED_CAMERA_v2_8=1 to enable ZED SDK 2.X
 
 USE_CPP=0
-DEBUG=0
+DEBUG=1
 
 ifeq ($(HIP_PLATFORM), nvcc)
 ARCH= -gencode arch=compute_35,code=sm_35 \
@@ -140,7 +140,7 @@ ifeq ($(USE_ROCM), 1)
   else ifeq ($(HIP_PLATFORM),nvcc)
     COMMON+= -DGPU -D__HIP_PLATFORM_NVCC__ -I/usr/local/cuda/include
     CFLAGS+= -DGPU
-    CPPFLAGS+= -x c++
+#    CPPFLAGS+=
     LDFLAGS+= -L/usr/local/cuda/lib64 -lcuda -lcudart -lcublas -lcurand
   endif
 
