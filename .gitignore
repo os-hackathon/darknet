@@ -48,6 +48,9 @@ Thumbs.db
 # Managed by CMake
 src/version.h
 
+# ROCM pre-hipify copies #
+*.prehip
+
 # Build artifacts
 lib/
 share/
