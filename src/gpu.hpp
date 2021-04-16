@@ -42,7 +42,6 @@
 #define cudaEventDestroy hipEventDestroy
 #define cudaStreamSynchronize hipStreamSynchronize
 #define cudaStreamWaitEvent hipStreamWaitEvent
-#define CUDA_SUCCESS HIP_SUCCESS
 #define cudaRuntimeGetVersion hipRuntimeGetVersion
 #define cudaDriverGetVersion hipDriverGetVersion
 #define cudaHostAlloc hipHostMalloc
