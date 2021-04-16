@@ -1,4 +1,4 @@
-USE_HIP=1
+USE_ROCM=1
 HIP_PLATFORM=hcc
 GPU=1
 CUDNN=0
@@ -85,7 +85,7 @@ NVCC=nvcc
 OPTS=-O3
 LDFLAGS= -lm -Xcompiler="-pthread"
 COMMON= -Iinclude/ -I3rdparty/stb/include
-ifeq ($(USE_HIP), 1)
+ifeq ($(USE_ROCM), 1)
   CFLAGS=
 else
   CFLAGS=-Wall -Wfatal-errors -Wno-unused-result -Wno-unknown-pragmas -fPIC
@@ -125,7 +125,7 @@ ifeq ($(OPENMP), 1)
 LDFLAGS+= -lgomp
 endif
 
-ifeq ($(USE_HIP), 1)
+ifeq ($(USE_ROCM), 1)
 
   CC=hipcc
   CPP=hipcc
@@ -206,7 +206,7 @@ $(APPNAMESO): $(LIBNAMESO) include/yolo_v2_class.hpp src/yolo_console_dll.cpp
 	$(CPP) -std=c++11 $(COMMON) $(CFLAGS) -o $@ src/yolo_console_dll.cpp $(LDFLAGS) -L ./ -l:$(LIBNAMESO)
 endif
 
-ifeq ($(USE_HIP),1)
+ifeq ($(USE_ROCM),1)
 NVCCFLAGS=$(CFLAGS) $(CPPFLAGS)
 else
 NVCCFLAGS='--compiler-options "$(CFLAGS) $(CPPFLAGS)"'
