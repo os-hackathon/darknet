@@ -494,7 +494,9 @@ void transpose_bin(uint32_t *A, uint32_t *B, const int n, const int m,
         for (j = 0; j < m; j += 32) {
             int a_index = i*lda + j;
             int b_index = j*ldb + i;
+            #ifndef __HIP_PLATFORM_HCC__ // Causes undefined errors when building with ROCM support
             transpose_32x32_bits_reversed_diagonale(&A[a_index / 32], &B[b_index / 32], lda / 32, ldb / 32);
+            #endif
             //transpose_32x32_bits_my(&A[a_index/32], &B[b_index/32], lda/32, ldb/32);
         }
         for (; j < m; ++j) {
